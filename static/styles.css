@@ -1,0 +1,279 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #fafafa;
+}
+
+#map {
+    width: 100%;
+    height: 100%; /* Ensure the map takes full height */
+}
+
+.map-container {
+    flex: 1;
+    width: 100%;
+    height: calc(100vh - 80px);
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    height: 80px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    position: relative;
+}
+
+.top-bar h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.top-bar-right {
+    text-align: right;
+}
+
+.logout-button {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.logout-button:hover {
+    background-color: #d32f2f;
+}
+
+.toggle-sidebar {
+    display: none;
+    font-size: 1.5rem;
+    background-color: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Modal styling */
+#imageModal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Sit on top of the page content */
+    z-index: 1000; /* Ensure it's on top of most elements */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.8); /* Black with opacity */
+}
+
+/* Modal image styling */
+#modalImage {
+    display: block;
+    margin: auto;
+    max-width: 80%;
+    max-height: 80%;
+    padding-top: 50px;
+}
+
+/* Caption styling */
+#caption {
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    font-size: 18px;
+}
+
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #f44336;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+.timeline-sidebar {
+    background-color: #ffffff;
+    width: 300px;
+    padding: 10px;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: transform 0.3s ease-in-out;
+}
+
+.timeline-sidebar.visible {
+    transform: translateX(0);
+}
+
+.timeline-sidebar h2, .timeline-sidebar h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+.timeline-sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.timeline-sidebar ul li {
+    cursor: pointer;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-sidebar ul li.highlight {
+    background-color: #f0f0f0;
+    border-left: 4px solid #2196F3;
+}
+
+.timeline-sidebar ul li .timestamp {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.timeline-sidebar ul li .pin-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.timeline-sidebar ul li .pin-details img.timeline-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.timeline-sidebar ul li .pin-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.timeline-sidebar ul li .edit-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.timeline-sidebar ul li .edit-button:hover {
+    background-color: #45a049;
+}
+
+.timeline-sidebar ul li .edit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.comment-sidebar {
+    background-color: white;
+    width: 300px;
+    padding: 20px;
+    right: 0;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.comment-sidebar h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+}
+
+.comment-sidebar form {
+    margin-bottom: 20px;
+}
+
+.comment-sidebar form label {
+    font-size: 1rem;
+}
+
+.comment-sidebar form input, .comment-sidebar form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.comment-sidebar form button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-sidebar form button:hover {
+    background-color: #45a049;
+}
+
+.comment-sidebar .comment {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.comment-sidebar .comment strong {
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .timeline-sidebar,
+    .comment-sidebar {
+        display: none;
+    }
+
+    .toggle-sidebar {
+        display: block;
+    }
+
+    .timeline-sidebar.visible, .comment-sidebar.visible {
+        display: block;
+    }
+
+    .map-container {
+        flex: 1;
+        width: 100%;
+        height: calc(100vh - 80px);
+    }
+}

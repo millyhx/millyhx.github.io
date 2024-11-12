@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track My Travel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <h1>Track My Travel</h1>
+            <p>Current Location: {{ recent_pin['location'] }}</p>
+        </div>
+        <div class="top-bar-right">
+            {% if user_type %}
+                <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+            {% endif %}
+            <button class="toggle-sidebar" onclick="toggleSidebar('left')">☰</button>
+            <button class="toggle-sidebar" onclick="toggleSidebar('right')">☰</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Timeline Sidebar (Left) -->
+        <div class="timeline-sidebar">
+            <h3>Timeline</h3>
+            <ul>
+                {% for pin in pins %}
+                    <li class="{{ 'highlight' if pin['id'] == recent_pin['id'] else '' }}" 
+                        data-id="{{ pin['id'] }}" onclick="showPin(this)">
+                        <div class="pin-details">
+                            <span>{{ pin['location'] }} - {{ pin['description'] }}</span>
+                            <span class="timestamp">Date: {{ pin['timestamp'] }}</span> 
+                            {% if pin.image %}
+                                <img src="{{ url_for('static', filename=pin.image) }}" 
+                                    alt="Timeline Image" 
+                                    class="timeline-image" 
+                                    data-image="{{ url_for('static', filename=pin.image) }}"
+                                    data-description="{{ pin.description|escape }}"
+                                    onclick="openModal(this)">
+                            {% else %}
+                                <img src="" alt="No image available" class="timeline-image">
+                            {% endif %}
+                            {% if user_type == "admin" %}
+                                <div class="pin-buttons">
+                                    <button class="edit-button" data-pin-id="{{ pin['id'] }}" onclick="editPin(this.getAttribute('data-pin-id'))">Edit</button>
+                                    <form action="{{ url_for('remove_pin', pin_id=pin['id']) }}" method="POST" style="display:inline;">
+                                        <button class="edit-button" type="submit" onclick="return confirm('Are you sure you want to remove this pin?');">Remove</button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Modal for larger image -->
+        <div id="imageModal" class="modal">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <img class="modal-content" id="modalImage">
+            <div id="caption"></div>
+        </div>
+
+
+        <!-- Map Section -->
+        <div class="map-container">
+            <div id="map" style="height: 100vh;"></div>
+        </div>
+
+        <!-- Right Sidebar (Fixed) -->
+        <div class="comment-sidebar">
+            {% if user_type == "admin" %}
+                <h3>Add a New Pin</h3>
+                <form action="{{ url_for('add_pin') }}" method="POST" enctype="multipart/form-data">
+                    <label>Location:</label><input type="text" name="location" required><br>
+                    <label>Description:</label><textarea name="description" required></textarea><br>
+                    <label>Image:</label><input type="file" name="image"><br>
+                    <button type="submit">Add Pin</button>
+                </form>
+            {% elif user_type == "user" %}
+                <h3>Leave a Comment</h3>
+                <form action="{{ url_for('add_comment', pin_id=recent_pin['id']) }}" method="POST">
+                    <label>Name:</label><input type="text" name="name" required><br>
+                    <label>Message:</label><textarea name="message" required></textarea><br>
+                    <button type="submit">Post Comment</button>
+                </form>
+            {% endif %}
+            
+            <h3>Comments</h3>
+            <div id="commentsSection">
+                <p id="noCommentsMessage">No comments yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editPin(pinId) {
+            window.location.href = `/edit_pin/${pinId}`;
+        }
+
+        const map = L.map('map').setView([51.505, -0.09], 2);  // Default location
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        const pins = {{ pins|tojson }};
+        
+        pins.forEach(pin => {
+            L.marker([pin.latitude, pin.longitude])
+                .addTo(map)
+                .bindPopup(`<b>${pin.location}</b><br>${pin.description}`);
+        });
+
+        // Function to toggle the timeline section
+        function showPin(element) {
+            const pinId = element.getAttribute('data-id');
+            const highlightedPin = document.querySelector(".highlight");
+            if (highlightedPin) highlightedPin.classList.remove("highlight");
+            element.classList.add("highlight");
+
+            fetch(`/api/get_pin/${pinId}`)
+                .then(response => response.json())
+                .then(data => {
+                    L.marker([data.latitude, data.longitude])
+                        .addTo(map)
+                        .bindPopup(`<b>${data.location}</b><br>${data.description}`)
+                        .openPopup();
+                    map.setView([data.latitude, data.longitude], 10);
+                });
+
+            const commentForm = document.querySelector('form[action*="/add_comment/"]');
+            if (commentForm) {
+                commentForm.action = `/add_comment/${pinId}`;
+            }
+
+            fetch(`/api/get_comments/${pinId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const commentsDiv = document.getElementById('commentsSection');
+                    commentsDiv.innerHTML = data.comments.length ? 
+                        data.comments.map(comment => `
+                            <div class="comment">
+                                <strong>${comment.name}:</strong> ${comment.message}
+                            </div>
+                        `).join('') : '<p>No comments yet for this location.</p>';
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const highlightedPin = document.querySelector('.highlight');
+            if (highlightedPin) showPin(highlightedPin);
+        });
+
+        // Toggle sidebar functionality for mobile view
+        function toggleSidebar(side) {
+            const sidebar = document.querySelector(`.${side}-sidebar`);
+            sidebar.classList.toggle('visible');
+        }
+
+
+        function openModal(imgElement) {
+            const imageSrc = imgElement.getAttribute('data-image');
+            const description = imgElement.getAttribute('data-description');
+
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const caption = document.getElementById('caption');
+
+            modal.style.display = "block";
+            modalImage.src = imageSrc;
+            caption.textContent = description; // use the description as the caption
+        }
+
+
+        // Function to close the modal
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = "none";
+        }
+
+    </script>
+</body>
+</html>

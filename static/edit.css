@@ -1,0 +1,64 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #0d1017;
+    color: white;
+    flex-direction: column; /* Ensure the content stacks vertically */
+}
+
+#edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 3px; /* Add space between elements */
+    text-align: left; /* Align text to the left */
+    width: 300px; /* Optional, to control form width */
+}
+
+label {
+    margin-bottom: 5px; /* Space between label and input */
+}
+
+input, textarea {
+    width: 100%; /* Use full width available */
+    height: 30px; /* Adjust height for better readability */
+    box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+textarea {
+    height: 80px; /* Adjust height for better readability */
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #337357;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #275b44; /* Optional hover effect for button */
+}
+
+a {
+    color: white;
+    text-decoration: none;
+    margin-top: 15px;
+    display: inline-block;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center; /* Center the image horizontally */
+    width: 100%; /* Make sure the container takes full width */
+}

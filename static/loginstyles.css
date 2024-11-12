@@ -1,0 +1,36 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    flex-direction: column;
+    padding: 0; /* Remove padding here */
+    background-color: #0d1017;
+    color: white;
+}
+
+#login-form {
+    text-align: center;
+}
+
+input[type="password"] {
+    padding: 10px;
+    margin: 10px 0;
+    width: 200px;
+    border: 1px solid #ccc;
+}
+
+#password-btn {
+    padding: 10px 20px;
+    background-color: #337357;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#password-btn:hover {
+    background-color: #45a049;
+}
